@@ -1,1 +1,1 @@
-Launches into protected mode
+Launches into protected mode and prints a character from the c kernel
