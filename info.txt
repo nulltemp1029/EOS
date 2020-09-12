@@ -1,2 +1,1 @@
-Prints hello in real mode
-toy
+Launches into protected mode
