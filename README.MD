@@ -1,0 +1,1 @@
+Contains a single stage 16-bit assembly bootloader which loads enters a 32-bit c-based kernel.

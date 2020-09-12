@@ -31,8 +31,8 @@ void update_cursor(uint16_t pos) {
 void print_string(char *msg, char color) {
 	char* video_memory = (char*) 0xb8000;
 	video_memory += cursor_pos*2;
-	int msg_len = len(msg);
-	for(int i = 0; i < msg_len; ++i) {
+	
+	for(int i = 0; i < len(msg); ++i) {
 		if(msg[i] == '\n') {
 			cursor_pos += (VGA_LENGTH - cursor_pos%VGA_HEIGHT);
 		} else {
@@ -45,8 +45,16 @@ void print_string(char *msg, char color) {
 }
 
 void main() {
+	// having the "outb" instruction cause global vars to
+	// reset for some reason, so I need to reinitializer 
+	// them here
 	VGA_LENGTH = 80;
 	VGA_HEIGHT = 40;
 	cursor_pos = 80;
+
 	print_string("32-bit protected mode c-kernel entered.\n", 0x0a);
+
+	while (true) {
+		
+	}
 }

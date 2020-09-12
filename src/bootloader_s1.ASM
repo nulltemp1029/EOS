@@ -53,9 +53,59 @@ BEGIN_PM:
 	jmp $
 
 
-%include "inc/real_mode_funcs.ASM"
-%include "inc/prot_mode_funcs.ASM"
-%include "inc/misc_vars.ASM"
+PROT_MODE_MSG db 'EOS 0.0.0.4 BOOTLOADER LOADED IN PROTECTED MODE', 0
+
+; gdt
+gdt_start:
+
+gdt_null:  
+	dd 0x0
+	dd 0x0 
+gdt_code:
+	dw 0xffff
+	dw 0x0 
+	db 0x0 
+	db 10011010b 
+	db 11001111b 
+	db 0x0
+gdt_data:
+	dw 0xffff
+	dw 0x0
+	db 0x0
+	db 10010010b
+	db 11001111b
+	db 0x0
+gdt_end: 
+
+gdt_descriptor:
+	dw gdt_end - gdt_start - 1
+	dd gdt_start
+
+CODE_SEG equ gdt_code - gdt_start
+DATA_SEG equ gdt_data - gdt_start
+
+VIDEO_MEMORY equ 0xb8000
+WHITE_ON_BLACK equ 0x0f
+
+print_string_pm:
+	pusha
+	mov edx, VIDEO_MEMORY
+print_string_pm_loop:
+	mov al, [ebx]
+	mov ah, WHITE_ON_BLACK
+	
+	cmp al, 0
+	je print_string_pm_done
+	
+	mov [edx], ax
+	
+	add ebx, 1
+	add edx, 2
+	
+	jmp print_string_pm_loop
+print_string_pm_done:
+	popa
+	ret
 
 times 510-($-$$) db 0
 dw 0xaa55
