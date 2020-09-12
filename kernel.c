@@ -1,9 +1,52 @@
-void main() {
-	// Declare a pointer to VGA text mode video memory byte
-	// 0, position (x, y) = (0, 0) or top left corner
-	char* video_memory = (char*) 0xb8000;
-	//
-	// Store the ascii character x at that location
-	*video_memory = '?';
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/io.h>
+#include <stdint.h>
+
+// note that graphics is in vga mode 2 (80x25)
+// starts on second line
+int cursor_pos = 0;
+int VGA_LENGTH = 80;
+int VGA_HEIGHT = 40;
+
+// gets length of string by counting until the end char
+// could be optimized probably
+int len(char* msg) {
+	for(int i = 0; 0==0; ++i) {
+		if(msg[i] == '\0') return i;
+	}
 }
 
+// prep vga for high byte (14) and send high byte
+// then prep vga for low byte (15) and send low byte
+void update_cursor(uint16_t pos) {
+	outb(14, 0x3d4);
+	outb(pos >> 8, 0x3d5);
+	outb(15, 0x3d4);
+	outb(pos, 0x3d5);
+}
+
+// prints string by placing it into video text memory
+// + cursor position offset, includes exception for \n
+void print_string(char *msg, char color) {
+	char* video_memory = (char*) 0xb8000;
+	video_memory += cursor_pos*2;
+	int msg_len = len(msg);
+	for(int i = 0; i < msg_len; ++i) {
+		if(msg[i] == '\n') {
+			cursor_pos += (VGA_LENGTH - cursor_pos%VGA_HEIGHT);
+		} else {
+			*video_memory++ = msg[i];
+			*video_memory++ = color;
+			cursor_pos++;
+		}
+	}
+	update_cursor(cursor_pos);
+}
+
+void main() {
+	VGA_LENGTH = 80;
+	VGA_HEIGHT = 40;
+	cursor_pos = 80;
+	print_string("32-bit protected mode c-kernel entered.\n", 0x0a);
+}

@@ -6,12 +6,9 @@ mov ah, 00
 mov al, 02
 int 10h
 
-
-
-KERNEL_OFFSET equ 0x2000;
+KERNEL_OFFSET equ 0x1000;
 
 ;mov [BOOT_DRIVE], dl
-
 
 mov bx, KERNEL_OFFSET
 mov dh, 1
@@ -26,7 +23,7 @@ int 0x13
 
 mov bp, 0x9000
 mov sp, BEGIN_PM
-
+;mov sp, bp
 cli                   ; disable interrupts
 
 lgdt [gdt_descriptor] ; load gdt from gdt_descriptor
@@ -43,22 +40,17 @@ init_pm:                           ; in protected mode
 	mov es, ax
 	mov fs, ax
 	mov gs, ax
-
-	mov ebp, 0x90000           ; update stack
-	mov esp, ebp               
+	mov ebp, 0x9000           ; stack
+	mov esp, ebp             
 	
-	call BEGIN_PM
+	jmp BEGIN_PM
 
 BEGIN_PM:
 	mov ebx, PROT_MODE_MSG     ; protected mode msg for print
 	call print_string_pm       ; print msg
 
-	xchg bx, bx
-	call KERNEL_OFFSET         ; go to kernel
+	jmp KERNEL_OFFSET         ; go to kernel
 	jmp $
-
-
-BOOT_DRIVE db 0
 
 
 %include "inc/real_mode_funcs.ASM"
